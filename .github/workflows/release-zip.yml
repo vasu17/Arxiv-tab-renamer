@@ -1,0 +1,28 @@
+name: Release Zip
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Create zip (exclude README and LICENSE)
+        run: |
+          zip -r arxiv-tab-renamer.zip . \
+            -x "README.md" "LICENSE" "*.zip" \
+            ".git/*" ".github/*"
+
+      - name: Upload asset to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: arxiv-tab-renamer.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
