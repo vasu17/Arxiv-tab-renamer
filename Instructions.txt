@@ -1,0 +1,46 @@
+HOW TO INSTALL ARXIV TITLE FIXER
+====================================================
+
+This extension is built for Chromium-based browsers (Chrome, Edge, Brave, Vivaldi, etc.).
+Since it is installed manually, please follow these steps:
+
+STEP 1: PREPARE THE FILES
+----------------------------------------------------
+1. Download the "extension.zip" file from the Releases page.
+2. Unzip (extract) the file into a folder on your computer.
+   * IMPORTANT: You cannot load the file while it is still zipped. 
+   * You must right-click and select "Extract All..." or "Unzip".
+
+STEP 2: OPEN THE EXTENSIONS MENU
+----------------------------------------------------
+Open your browser and navigate to the extensions management page:
+
+* Google Chrome:  Type "chrome://extensions" in the address bar.
+* Microsoft Edge: Type "edge://extensions" in the address bar.
+* Brave Browser:  Type "brave://extensions" in the address bar.
+* Opera:          Type "opera://extensions" in the address bar.
+
+STEP 3: ENABLE DEVELOPER MODE
+----------------------------------------------------
+1. Look for a toggle switch named "Developer mode".
+   * Chrome/Brave: Top-right corner.
+   * Edge: Left sidebar or bottom-left corner.
+2. Turn this switch ON. 
+   (You should see new buttons appear, like "Load unpacked").
+
+STEP 4: INSTALL THE EXTENSION
+----------------------------------------------------
+1. Click the button labeled "Load unpacked".
+2. A file selection window will open. Navigate to the folder where you unzipped the extension in Step 1.
+3. Select the folder and click "Select Folder" (or "Open").
+
+Done! The extension should now appear in your list and is ready to use.
+
+TROUBLESHOOTING
+----------------------------------------------------
+* Error: "Manifest file is missing or unreadable"
+  Solution: You likely selected the wrong folder level or didn't unzip the file. 
+  Make sure you select the folder that directly contains the "manifest.json" file.
+
+* Error: "Could not load background script"
+  Solution: Delete the extension from the list and try adding it again. Ensure all files (background.js, content.js) are present in the folder.
