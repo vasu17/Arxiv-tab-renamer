@@ -14,15 +14,21 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
+      - name: Compute names
+        id: names
+        run: |
+          TAG_NAME=${GITHUB_REF_NAME#refs/tags/}
+          echo "zip=arxiv-tab-renamer-${TAG_NAME}.zip" >> $GITHUB_OUTPUT
+
       - name: Create zip (exclude README and LICENSE)
         run: |
-          zip -r arxiv-tab-renamer.zip . \
+          zip -r "${{ steps.names.outputs.zip }}" . \
             -x "README.md" "LICENSE" "*.zip" \
             ".git/*" ".github/*"
 
       - name: Upload asset to release
         uses: softprops/action-gh-release@v2
         with:
-          files: arxiv-tab-renamer.zip
+          files: ${{ steps.names.outputs.zip }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
