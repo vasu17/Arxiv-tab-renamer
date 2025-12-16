@@ -22,17 +22,24 @@
         // If it's not an ArXiv paper, we exit and let the browser load it normally
         if (!arxivId) return;
 
+        // Prevent infinite loops if fetching fails repeatedly
+        const retryCount = parseInt(sessionStorage.getItem('arxiv_retry_count') || '0', 10);
+        if (retryCount > 2) {
+            console.warn("ArXiv Title Fixer: Too many failures, disabling for this tab.");
+            return;
+        }
+
         // --- STOP LOADING & START WRAPPER ---
         window.stop(); 
 
-        const initialTitle = "Loading Paper...";
+        let currentTitle = "Loading Paper...";
 
         // UI Builder
-        const setPageContent = (srcUrl, title) => {
+        const setPageContent = (srcUrl) => {
             document.documentElement.innerHTML = `
                 <html>
                 <head>
-                    <title>${title}</title>
+                    <title>${currentTitle}</title>
                     <style>
                         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #525659; }
                         iframe { width: 100%; height: 100%; border: none; display: block; }
@@ -48,24 +55,6 @@
         // Show loading screen
         document.body.innerHTML = '<h2 style="color:white; text-align:center; margin-top: 20%; font-family:sans-serif;">Loading PDF...</h2>';
         
-        // Fetch Blob (Bypass ArXiv Headers)
-        fetch(CURRENT_URL)
-            .then(response => response.blob())
-            .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
-                setPageContent(blobUrl, initialTitle);
-                
-                // Fetch Real Title
-                if (arxivId) {
-                    askBackgroundForTitle(arxivId);
-                }
-            })
-            .catch(err => {
-                console.error("Blob load failed:", err);
-                // Fallback: reload page normally if fetch fails
-                window.location.reload();
-            });
-
         function askBackgroundForTitle(id) {
             chrome.runtime.sendMessage({ type: "FETCH_ARXIV_DATA", id: id }, (response) => {
                 if (response && response.success) {
@@ -77,13 +66,41 @@
                         const titleNode = entry.getElementsByTagName("title")[0];
                         if (titleNode) {
                             // Clean Title: Remove newlines and trim
-                            const cleanTitle = titleNode.textContent.replace(/\s+/g, ' ').trim();
-                            document.title = cleanTitle;
+                            currentTitle = titleNode.textContent.replace(/\s+/g, ' ').trim();
+                            document.title = currentTitle;
                         }
                     }
                 }
             });
         }
+
+        // 1. Start Title Fetch Immediately
+        if (arxivId) {
+            askBackgroundForTitle(arxivId);
+        }
+
+        // 2. Fetch Blob (Bypass ArXiv Headers)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+        fetch(CURRENT_URL, { signal: controller.signal })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.blob();
+            })
+            .then(blob => {
+                sessionStorage.removeItem('arxiv_retry_count');
+                const blobUrl = URL.createObjectURL(blob);
+                setPageContent(blobUrl);
+            })
+            .catch(err => {
+                console.error("Blob load failed:", err);
+                const retries = parseInt(sessionStorage.getItem('arxiv_retry_count') || '0', 10);
+                sessionStorage.setItem('arxiv_retry_count', retries + 1);
+                // Fallback: reload page normally if fetch fails
+                window.location.reload();
+            });
     }
 
 })();
