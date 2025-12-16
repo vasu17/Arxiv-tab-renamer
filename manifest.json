@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ArXiv Title Fixer",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Automatically renames ArXiv PDF tabs with the actual paper title.",
   "permissions": [
     "scripting"
